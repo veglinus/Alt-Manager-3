@@ -1,7 +1,7 @@
 ## Interface: 90002
 ## Title: Alt Manager 2
 ## Author: Qoning, hupett
-## Version: v2.6.3
+## Version: v1.0.0-alpha1
 ## Notes: Concise information about your alts and weekly stuff.
 ## SavedVariables: MethodAltManagerDB
 
