@@ -6,5 +6,5 @@
 ## SavedVariables: MethodAltManagerDB
 
 embeds.xml
-AltManager.lua
+AltManager2.lua
 
