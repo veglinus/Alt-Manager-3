@@ -55,7 +55,7 @@ local soul_ash_label = "Soul Ash"
 local reservoir_anima_label = "Stored Anima"
 local torghast_label = "Torghast"
 
-local VERSION = "2.6.2"
+local VERSION = "1.0.0"
 
 local function GetCurrencyAmount(id)
 	local info = C_CurrencyInfo.GetCurrencyInfo(id)
@@ -66,20 +66,6 @@ end
 -- if Blizzard keeps supporting old api, get the IDs from
 -- C_ChallengeMode.GetMapTable() and names from C_ChallengeMode.GetMapUIInfo(id)
 local dungeons = {
-	-- BFA
-	-- [244] = "AD",
-	-- [245] = "FH",
-	-- [246] = "TD",
-	-- [247] = "ML",
-	-- [248] = "WCM",
-	-- [249] = "KR",
-	-- [250] = "Seth",
-	-- [251] = "UR",
-	-- [252] = "SotS",
-	-- [353] = "SoB",
-	-- [369] = "Mech:Junk",
-	-- [370] = "Mech:Shop",
-	-- Shadowlands
 	[375] = "MoTS",
 	[376] = "NW",
 	[377] = "DOS",
