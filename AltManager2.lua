@@ -1,7 +1,7 @@
 
 local _, AltManager = ...;
 
-_G["AltManager"] = AltManager;
+_G["AltManager2"] = AltManager;
 
 -- Made by: Qooning - Tarren Mill, 2017-2020
 -- Previously Method Alt Manager
@@ -10,13 +10,11 @@ _G["AltManager"] = AltManager;
 
 local Dialog = LibStub("LibDialog-1.0")
 
---local sizey = 200;
 local sizey = 320;
 local instances_y_add = 45;
 local xoffset = 0;
 local yoffset = 40;
-local alpha = 1;
-local addon = "AltManager";
+local addon = "AltManager2";
 local numel = table.getn;
 
 local per_alt_x = 120;
@@ -30,30 +28,13 @@ local name_label = "" -- Name
 local mythic_done_label = "Highest M+"
 local mythic_rewards_label = "M+ Rewards"
 local mythic_keystone_label = "Keystone"
-local seals_owned_label = "BfA Seals owned"
-local seals_bought_label = "Seals obtained"
-local vessels_of_horrific_visions_label = "Vessels"
-local artifact_reaserch_label = "AK level"
-local coalescing_visions_label = "Coalescing Visions"
-local mementos_label = "Mementos"
-local echoes_label = "Echoes"
-local artifact_research_time_label = "Next level in"
-local depleted_label = "Depleted"
-local nightbane_label = "Nightbane"
-local resources_label = "War Resources"
 local worldboss_label = "World Boss"
 local conquest_label = "Conquest"
 local conquest_earned_label = "Conquest Earned"
-local islands_label = "Islands"
-local pearls_label = "Manapearls"
-local neck_label = "Neck level"
-local residuum_label = "Residuum"
 local renown_label = "Renown"
-local conduit_charges_label = "Conduit Charges"
 local stygia_label = "Stygia"
 local soul_ash_label = "Soul Ash"
 local reservoir_anima_label = "Stored Anima"
-local torghast_label = "Torghast"
 
 local VERSION = "1.0.0"
 
@@ -62,9 +43,7 @@ local function GetCurrencyAmount(id)
 	return info.quantity;
 end
 
-
 -- if Blizzard keeps supporting old api, get the IDs from
--- C_ChallengeMode.GetMapTable() and names from C_ChallengeMode.GetMapUIInfo(id)
 local dungeons = {
 	[375] = "MoTS",
 	[376] = "NW",
@@ -140,9 +119,6 @@ do
 	main_frame.background:SetDrawLayer("ARTWORK", 1);
 	main_frame.background:SetColorTexture(0, 0, 0, 0.5);
 	
-	-- main_frame.scan_tooltip = CreateFrame('GameTooltip', 'DepletedTooltipScan', UIParent, 'GameTooltipTemplate');
-	
-
 	-- Set frame position
 	main_frame:ClearAllPoints();
 	main_frame:SetPoint("CENTER", UIParent, "CENTER", xoffset, yoffset);
@@ -195,16 +171,11 @@ function AltManager:InitDB()
 end
 
 function AltManager:CalculateXSizeNoGuidCheck()
-	local alts = MethodAltManagerDB.alts;
+	local alts = AltManager2DB.alts;
 	return max((alts + 1) * per_alt_x, min_x_size)
 end
 
 function AltManager:CalculateXSize()
-	-- local alts = MethodAltManagerDB.alts;
-	-- -- HACK: DUE TO THE LOGIN DATA GLITCH, I HAVE TO CHECK IF CURRENT ALT IS NEW
-	-- local guid = UnitGUID('player');
-	-- if MethodAltManagerDB.data[guid] == nil then alts = alts + 1 end
-	-- return max((alts + 1) * per_alt_x, min_x_size)
 	return self:CalculateXSizeNoGuidCheck()
 end
 
@@ -223,31 +194,30 @@ function AltManager:OnLogin()
 end
 
 function AltManager:PurgeDbShadowlands()
-	if MethodAltManagerDB == nil or MethodAltManagerDB.data == nil then return end
+	if AltManager2DB == nil or AltManager2DB.data == nil then return end
 	local remove = {}
-	for alt_guid, alt_data in spairs(MethodAltManagerDB.data, function(t, a, b) return t[a].ilevel > t[b].ilevel end) do
+	for alt_guid, alt_data in spairs(AltManager2DB.data, function(t, a, b) return t[a].ilevel > t[b].ilevel end) do
 		if alt_data.charlevel == nil or alt_data.charlevel < min_level then -- poor heuristic to remove old max level chars
 			table.insert(remove, alt_guid)
 		end
 	end
 	for k, v in pairs(remove) do
 		-- don't need to redraw, this is don on load
-		MethodAltManagerDB.alts = MethodAltManagerDB.alts - 1;
-		MethodAltManagerDB.data[v] = nil
-		-- self:RemoveCharacterByGuid(v, true);
+		AltManager2DB.alts = AltManager2DB.alts - 1;
+		AltManager2DB.data[v] = nil
 	end
 end
 
 function AltManager:OnLoad()
 	self.main_frame:UnregisterEvent("ADDON_LOADED");
 	
-	MethodAltManagerDB = MethodAltManagerDB or self:InitDB();
+	AltManager2DB = AltManager2DB or self:InitDB();
 
 	self:PurgeDbShadowlands();
 
-	if MethodAltManagerDB.alts ~= true_numel(MethodAltManagerDB.data) then
-		print("Altcount inconsistent, using", true_numel(MethodAltManagerDB.data))
-		MethodAltManagerDB.alts = true_numel(MethodAltManagerDB.data)
+	if AltManager2DB.alts ~= true_numel(AltManager2DB.data) then
+		print("Altcount inconsistent, using", true_numel(AltManager2DB.data))
+		AltManager2DB.alts = true_numel(AltManager2DB.data)
 	end
 
 	self.addon_loaded = true
@@ -277,8 +247,8 @@ end
 
 function AltManager:Keyset()
 	local keyset = {}
-	if MethodAltManagerDB and MethodAltManagerDB.data then
-		for k in pairs(MethodAltManagerDB.data) do
+	if AltManager2DB and AltManager2DB.data then
+		for k in pairs(AltManager2DB.data) do
 			table.insert(keyset, k)
 		end
 	end
@@ -286,7 +256,7 @@ function AltManager:Keyset()
 end
 
 function AltManager:ValidateReset()
-	local db = MethodAltManagerDB
+	local db = AltManager2DB
 	if not db then return end;
 	if not db.data then return end;
 	
@@ -316,11 +286,11 @@ function AltManager:ValidateReset()
 end
 
 function AltManager:Purge()
-	MethodAltManagerDB = self:InitDB();
+	AltManager2DB = self:InitDB();
 end
 
 function AltManager:RemoveCharactersByName(name)
-	local db = MethodAltManagerDB;
+	local db = AltManager2DB;
 
 	local indices = {};
 	for guid, data in pairs(db.data) do
@@ -341,7 +311,7 @@ function AltManager:RemoveCharactersByName(name)
 end
 
 function AltManager:RemoveCharacterByGuid(index, skip_confirmation)
-	local db = MethodAltManagerDB;
+	local db = AltManager2DB;
 
 	if db.data[index] == nil then return end
 
@@ -438,7 +408,7 @@ function AltManager:StoreData(data)
 
 	if UnitLevel('player') < min_level then return end;
 	
-	local db = MethodAltManagerDB;
+	local db = AltManager2DB;
 	local guid = data.guid;
 	
 	db.data = db.data or {};
@@ -489,11 +459,10 @@ function AltManager:CollectData(do_artifact)
 	local guid = UnitGUID('player');
 
 	local mine_old = nil
-	if MethodAltManagerDB and MethodAltManagerDB.data then
-		mine_old = MethodAltManagerDB.data[guid];
+	if AltManager2DB and AltManager2DB.data then
+		mine_old = AltManager2DB.data[guid];
 	end
 	
-	-- C_MythicPlus.RequestRewards();
 	C_MythicPlus.RequestCurrentAffixes();
 	C_MythicPlus.RequestMapInfo();
 	for k,v in pairs(dungeons) do
@@ -505,19 +474,7 @@ function AltManager:CollectData(do_artifact)
         C_ChallengeMode.RequestLeaders(maps[i]);
     end
 
-	-- try the new api
-	-- highest_mplus = C_MythicPlus.GetWeeklyChestRewardLevel()
-
 	local run_history = C_MythicPlus.GetRunHistory(false, true);
-	
-	--[[for k,v in pairs(dungeons) do
-		C_MythicPlus.RequestMapInfo(k);
-		-- there is a problem with relogging and retaining old value :(
-		local _, l = C_MythicPlus.GetWeeklyBestForMap(k);
-		if l and l > highest_mplus then
-			highest_mplus = l;
-		end
-	end ]]--
 	
 	-- find keystone
 	local keystone_found = false;
@@ -525,8 +482,6 @@ function AltManager:CollectData(do_artifact)
 		local slots = GetContainerNumSlots(container)
 		for slot=1, slots do
 			local _, _, _, _, _, _, slotLink, _, _, slotItemID = GetContainerItemInfo(container, slot)
-			-- print(slotLink)
-			--if slotItemID then print(slotItemID, GetItemInfo(slotItemID)) end
 			
 			--	might as well check if the item is a vessel of horrific vision
 			if slotItemID == 173363 then
@@ -545,41 +500,10 @@ function AltManager:CollectData(do_artifact)
 		end
 	end
   
-  -- nice idea, but these functions return weird values on login and logout
-  --dungeon = C_MythicPlus.GetOwnedKeystoneChallengeMapID()
-  --level = C_MythicPlus.GetOwnedKeystoneLevel()
-  
-  --if dungeon then keystone_found = true end
-  
 	if not keystone_found then
 		dungeon = "Unknown";
 		level = "?"
 	end
-
-	-- order resources
-	-- local order_resources = GetCurrencyAmount(1560);
-	
-	-- seals = GetCurrencyAmount(1580);
-	seals = 0;
-	-- coalescing_visions = GetCurrencyAmount(1755);
-	
-	-- seals_bought = 0
-	-- local gold_1 = C_QuestLog.IsQuestFlaggedCompleted(52834)
-	-- if gold_1 then seals_bought = seals_bought + 1 end
-	-- local gold_2 = C_QuestLog.IsQuestFlaggedCompleted(52838)
-	-- if gold_2 then seals_bought = seals_bought + 1 end
-	-- local resources_1 = C_QuestLog.IsQuestFlaggedCompleted(52837)
-	-- if resources_1 then seals_bought = seals_bought + 1 end
-	-- local resources_2 = C_QuestLog.IsQuestFlaggedCompleted(52840)
-	-- if resources_2 then seals_bought = seals_bought + 1 end
-	-- local marks_1 = C_QuestLog.IsQuestFlaggedCompleted(52835)
-	-- if marks_1 then seals_bought = seals_bought + 1 end
-	-- local marks_2 = C_QuestLog.IsQuestFlaggedCompleted(52839)
-	-- if marks_2 then seals_bought = seals_bought + 1 end
-	
-	
-	-- local class_hall_seal = C_QuestLog.IsQuestFlaggedCompleted(43510)
-	-- if class_hall_seal then seals_bought = seals_bought + 1 end
 
 	local saves = GetNumSavedInstances();
 	local normal_difficulty = 14
@@ -588,31 +512,6 @@ function AltManager:CollectData(do_artifact)
 	for i = 1, saves do
 		local name, _, reset, difficulty, _, _, _, _, _, _, bosses, killed_bosses = GetSavedInstanceInfo(i);
 
-		-- check for raids
-		-- if name == C_Map.GetMapInfo(1148).name and reset > 0 then
-		-- 	if difficulty == normal_difficulty then uldir_normal = killed_bosses end
-		-- 	if difficulty == heroic_difficulty then uldir_heroic = killed_bosses end
-		-- 	if difficulty == mythic_difficulty then uldir_mythic = killed_bosses end
-		-- end
-		-- if name == C_Map.GetMapInfo(1352).name and reset > 0 then
-		-- 	if difficulty == normal_difficulty then bod_normal = killed_bosses end
-		-- 	if difficulty == heroic_difficulty then bod_heroic = killed_bosses end
-		-- 	if difficulty == mythic_difficulty then bod_mythic = killed_bosses end
-		-- end
-		-- if name == C_Map.GetMapInfo(1512).name and reset > 0 then
-		-- 	if difficulty == normal_difficulty then ep_normal = killed_bosses end
-		-- 	if difficulty == heroic_difficulty then ep_heroic = killed_bosses end
-		-- 	if difficulty == mythic_difficulty then ep_mythic = killed_bosses end
-		-- end
-		-- hack that may not work for other localizations
-		-- I can't find any reference to the full name in the API, but the saved info returns the full name
-		-- local nyalotha_lfg_name = GetLFGDungeonInfo(2033)
-		-- if name == nyalotha_lfg_name and reset > 0 then -- is it okay to use any Nyalotha id? 2217
-		-- 	if difficulty == normal_difficulty then nyalotha_normal = killed_bosses end
-		-- 	if difficulty == heroic_difficulty then nyalotha_heroic = killed_bosses end
-		-- 	if difficulty == mythic_difficulty then nyalotha_mythic = killed_bosses end
-		-- end
-
 		-- Castle Nathria IDs = {1735, 1744, 1745, 1746, 1747, 1748, 1750, 1755}
 		if name == C_Map.GetMapInfo(1735).name and reset > 0 then
 			if difficulty == normal_difficulty then nathria_normal = killed_bosses end
@@ -620,11 +519,6 @@ function AltManager:CollectData(do_artifact)
 			if difficulty == mythic_difficulty then nathria_mythic = killed_bosses end
 		end
 	end
-	
-	-- Can find map info quickly like this
-	-- /run for i=1,GetNumSavedInstances() do print(GetSavedInstanceInfo(i)) end
-	-- /run for i=0,20000 do if C_Map.GetMapInfo(i) then if C_Map.GetMapInfo(i).name == "Ny'alotha, the Waking City" then print(i) end end end
-	-- /run for i=2000,2400 do if GetLFGDungeonInfo(i) then print(i, GetLFGDungeonInfo(i)) end end 
 
 	local world_boss_quests = {
 		[61813] = "Valinor",
@@ -638,8 +532,6 @@ function AltManager:CollectData(do_artifact)
 			worldboss = v
 		end
 	end
-	
-	-- local conquest_earned = C_WeeklyRewards.GetConquestWeeklyProgress().progress;
 
 	-- this is how the official pvp ui does it, so if its wrong.. sue me
 	local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(Constants.CurrencyConsts.CONQUEST_CURRENCY_ID);
@@ -648,31 +540,7 @@ function AltManager:CollectData(do_artifact)
 	local conquest_total = currencyInfo.quantity
 	local conquest_max = maxProgress;
 	
-	-- local _, _, _, islands, _ = GetQuestObjectiveInfo(C_IslandsQueue.GetIslandsWeeklyQuestID(), 1, false);
-	-- local islands_finished = C_QuestLog.IsQuestFlaggedCompleted(C_IslandsQueue.GetIslandsWeeklyQuestID())
-
-	
 	local _, ilevel = GetAverageItemLevel();
-
-	-- local pearls = GetCurrencyAmount(1721);
-	-- local residuum = GetCurrencyAmount(1718);
-	-- local echoes = GetCurrencyAmount(1803);
-	-- local corrupted_mementos = GetCurrencyAmount(1719); -- jebaited with 1744 id, which is probably the "in vision" currency
-
-	-- /run for i=0,20000 do n,a = GetCurrencyInfo(i); if a == 1365 then print(i) end end
-	-- /run for i=0,20000 do n = C_CurrencyInfo.GetCurrencyInfo(i); if n ~= nil and n.name == "Stygia" then print(i) end end
-
-	-- local location = C_AzeriteItem.FindActiveAzeriteItem()
-	-- local neck_level
-	-- if not location then neck_level = 0
-	-- else neck_level = C_AzeriteItem.GetPowerLevel(location)
-	-- end
-
-	-- store data into a table
-
-	local conduit_charges = 0;
-	local max_conduit_charges = 0;
-	-- local now = C_DateAndTime.GetCurrentCalendarTime();
 
 	local stygia = GetCurrencyAmount(1767);
 	local soul_ash = GetCurrencyAmount(1828);
@@ -680,13 +548,6 @@ function AltManager:CollectData(do_artifact)
 	local renown = C_CovenantSanctumUI.GetRenownLevel();
 
 	local char_table = {}
-	
-	-- hooksecurefunc(C_VignetteInfo, "GetVignettes", function(...) print("GetVignettes", ...); end)
-	-- hooksecurefunc(C_VignetteInfo, "GetVignetteInfo", function(...) print("GetVignetteInfo", ...); end)
-	-- /run for k, v in ipairs(GameTooltip.insertedFrames[1].widgetPools.pools.UIWidgetTemplateTextWithState.activeObjects) do print(k) end
-	-- /tinspect GameTooltip.insertedFrames[1]
-	-- /run VignettePinMixin:OnMouseEnter(); a, b, c, d = GameTooltip.insertedFrames[1]:GetChildren(); print(a.Text:GetText())
-	-- Looks like getting torghast progress with addon API is a nightmare right now
 
 	char_table.guid = UnitGUID('player');
 	char_table.name = name;
@@ -700,8 +561,6 @@ function AltManager:CollectData(do_artifact)
 	char_table.conquest_earned = conquest_earned;
 	char_table.conquest_total = conquest_total;
 
-	char_table.conduit_charges = conduit_charges;
-	char_table.max_conduit_charges = max_conduit_charges;
 	char_table.stygia = stygia;
 	char_table.soul_ash = soul_ash;
 	char_table.stored_anima = stored_anima;
@@ -714,29 +573,13 @@ function AltManager:CollectData(do_artifact)
 	char_table.expires = self:GetNextWeeklyResetTime();
 	char_table.data_obtained = time();
 	char_table.time_until_reset = C_DateAndTime.GetSecondsUntilDailyReset();
-	
-	-- old stuff
-	-- char_table.order_resources = order_resources;
-	-- char_table.veiled_argunite = veiled_argunite;
-	-- char_table.wakening_essence = wakening_essence;
-	-- char_table.islands =  islands; 
-	-- char_table.islands_finished = islands_finished;
-	-- char_table.pearls = pearls
-	-- char_table.residuum = residuum
-	-- char_table.corrupted_mementos = corrupted_mementos
-	-- char_table.neck_level = neck_level
-	-- char_table.echoes = echoes
-	-- char_table.seals = seals;
-	-- char_table.seals_bought = seals_bought;
-	-- char_table.vessels = vessels;
-	-- char_table.coalescing_visions = coalescing_visions;
 
 	return char_table;
 end
 
 function AltManager:UpdateStrings()
 	local font_height = 20;
-	local db = MethodAltManagerDB;
+	local db = AltManager2DB;
 	
 	local keyset = {}
 	for k in pairs(db.data) do
@@ -805,7 +648,7 @@ end
 function AltManager:UpdateInstanceStrings(my_rows, font_height)
 	self.instances_unroll.alt_columns = self.instances_unroll.alt_columns or {};
 	local alt = 0
-	local db = MethodAltManagerDB;
+	local db = AltManager2DB;
 	for alt_guid, alt_data in spairs(db.data, function(t, a, b) return t[a].ilevel > t[b].ilevel end) do
 		alt = alt + 1
 		-- create the frame to which all the fontstrings anchor
@@ -938,7 +781,6 @@ function AltManager:CreateContent()
 	self.main_frame.closeButton:ClearAllPoints()
 	self.main_frame.closeButton:SetPoint("BOTTOMRIGHT", self.main_frame, "TOPRIGHT", -10, -2);
 	self.main_frame.closeButton:SetScript("OnClick", function() AltManager:HideInterface(); end);
-	--self.main_frame.closeButton:SetSize(32, h);
 
 	local column_table = {
 		name = {
@@ -949,7 +791,7 @@ function AltManager:CreateContent()
 		},
 		ilevel = {
 			order = 2,
-			data = function(alt_data) return string.format("%.2f", alt_data.ilevel or 0) end, -- , alt_data.neck_level or 0
+			data = function(alt_data) return string.format("%.2f", alt_data.ilevel or 0) end,
 			justify = "TOP",
 			font = "Fonts\\FRIZQT__.TTF",
 			remove_button = function(alt_data) return self:CreateRemoveButton(function() AltManager:RemoveCharacterByGuid(alt_data.guid) end) end
@@ -964,49 +806,12 @@ function AltManager:CreateContent()
 			label = mythic_keystone_label,
 			data = function(alt_data) return (dungeons[alt_data.dungeon] or alt_data.dungeon) .. " +" .. tostring(alt_data.level); end,
 		},
-		-- seals_owned = {
-		-- 	order = 5,
-		-- 	label = seals_owned_label,
-		-- 	data = function(alt_data) return tostring(alt_data.seals) end,
-		-- },
-		-- seals_bought = {
-		-- 	order = 6,
-		-- 	label = seals_bought_label,
-		-- 	data = function(alt_data) return tostring(alt_data.seals_bought) end,
-		-- },
+
 		fake_just_for_offset = {
 			order = 6.1,
 			label = "",
 			data = function(alt_data) return " " end,
 		},
-		-- vessels = {
-		-- 	order = 6.5,
-		-- 	label = vessels_of_horrific_visions_label,
-		-- 	data = function(alt_data) return tostring(alt_data.vessels or "0") end,
-		-- },
-		-- coalascing_visions = {
-		-- 	order = 6.6,
-		-- 	label = coalescing_visions_label,
-		-- 	data = function(alt_data) return tostring(alt_data.coalescing_visions or "0") end,
-		-- },
-		-- corrupted_mementos = {
-		-- 	order = 6.7,
-		-- 	label = mementos_label,
-		-- 	data = function(alt_data) return tostring(alt_data.corrupted_mementos or "0") end,
-		-- },
-		-- residuum = {
-		-- 	order = 7,
-		-- 	label = residuum_label,
-		-- 	data = function(alt_data) return alt_data.residuum and tostring(alt_data.residuum) or "0" end,
-		-- },
-		-- echoes = {
-		-- 	order = 7.5,
-		-- 	label = echoes_label,
-		-- 	data = function(alt_data) return alt_data.echoes and tostring(alt_data.echoes) or "0" end,
-		-- },
-
-		-- char_table.conduit_charges = conduit_charges;
-		-- char_table.max_conduit_charges = max_conduit_charges;
 
 		renown = {
 			order = 6.2,
@@ -1023,11 +828,6 @@ function AltManager:CreateContent()
 			label = soul_ash_label,
 			data = function(alt_data) return tostring(alt_data.soul_ash or "0") end,
 		},
-		conduit_charges = {
-			order = 6.45,
-			label = conduit_charges_label,
-			data = function(alt_data) local have_charges = alt_data.conduit_charges ~= nil; if have_charges then return tostring( min(alt_data.conduit_charges + self:ConduitChargesRegenerated(alt_data), alt_data.max_conduit_charges)) .. " / " .. tostring(alt_data.max_conduit_charges) else return "?" end end
-		},
 		
 		stored_anima = {
 			order = 6.5,
@@ -1040,6 +840,7 @@ function AltManager:CreateContent()
 			label = "",
 			data = function(alt_data) return " " end,
 		},
+
 		worldbosses = {
 			order = 7.9,
 			label = worldboss_label,
@@ -1056,25 +857,6 @@ function AltManager:CreateContent()
 			data = function(alt_data) return (alt_data.conquest_earned and (tostring(alt_data.conquest_earned) .. " / " .. C_CurrencyInfo.GetCurrencyInfo(Constants.CurrencyConsts.CONQUEST_CURRENCY_ID).maxQuantity) or "?")  end, --   .. "/" .. "500"
 		},
 
-		-- BFA resources
-		-- order_resources = {
-		-- 	order = 9,
-		-- 	label = resources_label,
-		-- 	data = function(alt_data) return alt_data.order_resources and tostring(alt_data.order_resources) or "0" end,
-		-- },
-		-- sort of became irrelevant for now
-		-- pearls = {
-		-- 	order = 9.5,
-		-- 	label = pearls_label,
-		-- 	data = function(alt_data) return alt_data.pearls and tostring(alt_data.pearls) or "0" end,
-		-- },
-
-
-		-- islands = {
-		-- 	order = 11,
-		-- 	label = islands_label,
-		-- 	data = function(alt_data) return (alt_data.islands_finished and "Capped") or ((alt_data.islands and tostring(alt_data.islands)) or "?") .. "/ 36K"  end,
-		-- },
 		dummy_line = {
 			order = 12,
 			label = " ",
@@ -1127,7 +909,6 @@ function AltManager:CreateContent()
 			-- create a button that will unroll it
 			local unroll_button = CreateFrame("Button", "UnrollButton", self.main_frame, "UIPanelButtonTemplate");
 			unroll_button:SetText(row.name);
-			--unroll_button:SetFrameStrata("HIGH");
 			unroll_button:SetFrameLevel(self.main_frame:GetFrameLevel() + 2)
 			unroll_button:SetSize(unroll_button:GetTextWidth() + 20, 25);
 			unroll_button:SetPoint("BOTTOMRIGHT", self.main_frame, "TOPLEFT", 4 + per_alt_x, -(i-1)*font_height-10);
@@ -1189,9 +970,7 @@ function AltManager:MakeTopBottomTextures(frame)
 	if frame.topPanel == nil then
 		frame.topPanel = CreateFrame("Frame", "AltManagerTopPanel", frame);
 		frame.topPanelTex = frame.topPanel:CreateTexture(nil, "BACKGROUND");
-		--frame.topPanelTex:ClearAllPoints();
 		frame.topPanelTex:SetAllPoints();
-		--frame.topPanelTex:SetSize(frame:GetWidth(), 30);
 		frame.topPanelTex:SetDrawLayer("ARTWORK", -5);
 		frame.topPanelTex:SetColorTexture(0, 0, 0, 0.7);
 		
