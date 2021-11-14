@@ -1,12 +1,11 @@
+-- Made by: Qooning - Tarren Mill, 2017-2020
+-- Previously Method Alt Manager
+-- updates for Bfa by: Kabootzey - Tarren Mill <Ended Careers>, 2018
+-- updates for 9.1.5 - hupett, 2021
 
 local _, AltManager = ...;
 
 _G["AltManager2"] = AltManager;
-
--- Made by: Qooning - Tarren Mill, 2017-2020
--- Previously Method Alt Manager
--- updates for Bfa by: Kabootzey - Tarren Mill <Ended Careers>, 2018
--- Last edit: 14/10/2020
 
 local Dialog = LibStub("LibDialog-1.0")
 
@@ -24,7 +23,6 @@ local remove_button_size = 12;
 local min_x_size = 300;
 
 local min_level = 60;
-local name_label = "" -- Name
 local mythic_done_label = "Highest M+"
 local mythic_rewards_label = "M+ Rewards"
 local mythic_keystone_label = "Keystone"
@@ -43,7 +41,6 @@ local function GetCurrencyAmount(id)
 	return info.quantity;
 end
 
--- if Blizzard keeps supporting old api, get the IDs from
 local dungeons = {
 	[375] = "MoTS",
 	[376] = "NW",
@@ -55,9 +52,7 @@ local dungeons = {
 	[382] = "ToP",
  };
 
-
-SLASH_ALTMANAGER1 = "/mam";
-SLASH_ALTMANAGER2 = "/alts";
+SLASH_ALTMANAGER1 = "/alts";
 
 local function spairs(t, order)
     local keys = {}
@@ -99,17 +94,6 @@ function SlashCmdList.ALTMANAGER(cmd, editbox)
 	end
 end
 
-function list_items()
-	a = {}
-	for i = 1,200000 do
-		local n = GetItemInfo(i)
-		if n ~= nil  then
-			print(n)
-			table.insert(a, n)
-		end
-	end
-end
-
 do
 	local main_frame = CreateFrame("frame", "AltManagerFrame", UIParent);
 	AltManager.main_frame = main_frame;
@@ -125,15 +109,12 @@ do
 	
 	main_frame:RegisterEvent("ADDON_LOADED");
 	main_frame:RegisterEvent("PLAYER_LOGIN");
-	main_frame:RegisterEvent("PLAYER_LOGOUT");
-	main_frame:RegisterEvent("QUEST_TURNED_IN");
+	main_frame:RegisterEvent("PLAYER_LEAVING_WORLD");
 	main_frame:RegisterEvent("BAG_UPDATE_DELAYED");
-	main_frame:RegisterEvent("ARTIFACT_XP_UPDATE");
+	main_frame:RegisterEvent("QUEST_TURNED_IN");
 	main_frame:RegisterEvent("CHAT_MSG_CURRENCY");
 	main_frame:RegisterEvent("CURRENCY_DISPLAY_UPDATE");
-	main_frame:RegisterEvent("PLAYER_LEAVING_WORLD");
 	
-
 	main_frame:SetScript("OnEvent", function(self, ...)
 		local event, loaded = ...;
 		if event == "ADDON_LOADED" then
@@ -144,7 +125,7 @@ do
 		if event == "PLAYER_LOGIN" then
         	AltManager:OnLogin();
 		end
-		if event == "PLAYER_LEAVING_WORLD" or event == "ARTIFACT_XP_UPDATE" then
+		if event == "PLAYER_LEAVING_WORLD" then
 			local data = AltManager:CollectData(false);
 			AltManager:StoreData(data);
 		end
@@ -159,7 +140,6 @@ do
 	main_frame:SetScript("OnKeyDown", function(self, key) if key == "ESCAPE" then main_frame:SetPropagateKeyboardInput(false); else main_frame:SetPropagateKeyboardInput(true); end end )
 	main_frame:SetScript("OnKeyUp", function(self, key) if key == "ESCAPE" then  AltManager:HideInterface() end end);
 	
-	-- Show Frame
 	main_frame:Hide();
 end
 
@@ -270,7 +250,6 @@ function AltManager:ValidateReset()
 		local char_table = db.data[keyset[alt]];
 		if time() > expiry then
 			-- reset this alt
-			char_table.seals_bought = 0;
 			char_table.dungeon = "Unknown";
 			char_table.level = "?";
 			char_table.run_history = nil;
@@ -373,28 +352,6 @@ function AltManager:RemoveCharacterByGuid(index, skip_confirmation)
 
 end
 
-
-function conquest_cap()
-	local CONQUEST_QUESTLINE_ID = 782; -- BFA questline ID = 782
-    local currentQuestID = QuestUtils_GetCurrentQuestLineQuest(CONQUEST_QUESTLINE_ID);
-
-    -- if not on a current quest that means all caught up for this week
-    if currentQuestID == 0 then
-        return 0, 0, 0;
-    end
-
-    if not HaveQuestData(currentQuestID) then
-        return 0, 0, nil;
-    end
-
-    local objectives = C_QuestLog.GetQuestObjectives(currentQuestID);
-    if not objectives or not objectives[1] then
-        return 0, 0, nil;
-    end
-
-    return objectives[1].numFulfilled, objectives[1].numRequired, currentQuestID;
-end
-
 function AltManager:StoreData(data)
 
 	if not self.addon_loaded then
@@ -424,8 +381,6 @@ function AltManager:StoreData(data)
 		db.data[guid] = data;
 		db.alts = db.alts + 1;
 	else
-		local lvl = db.data[guid].artifact_level;
-		data.artifact_level = data.artifact_level or lvl;
 		db.data[guid] = data;
 	end
 end
@@ -447,14 +402,6 @@ function AltManager:CollectData(do_artifact)
 	local dungeon = nil;
 	local expire = nil;
 	local level = nil;
-	local seals = nil;
-	local coalescing_visions = 0;
-	local seals_bought = nil;
-	local artifact_level = nil;
-	local next_research = nil;
-	local highest_mplus = 0;
-	local depleted = false;
-	local vessels = 0
 
 	local guid = UnitGUID('player');
 
@@ -620,8 +567,6 @@ function AltManager:UpdateStrings()
 				current_row:SetText(column.data(alt_data))
 				if column.font then
 					current_row:GetFontString():SetFont(column.font, ilvl_text_size)
-				else
-					--current_row:GetFontString():SetFont("Fonts\\FRIZQT__.TTF", 14)
 				end
 				if column.justify then
 					current_row:GetFontString():SetJustifyV(column.justify);
@@ -786,7 +731,7 @@ function AltManager:CreateContent()
 	local column_table = {
 		name = {
 			order = 1,
-			label = name_label,
+			label = "",
 			data = function(alt_data) return alt_data.name end,
 			color = function(alt_data) return RAID_CLASS_COLORS[alt_data.class] end,
 		},
@@ -883,7 +828,7 @@ function AltManager:CreateContent()
 				end
 			end,
 			rows = {
-				uldir = {
+				castle_nathria = {
 					order = 4,
 					label = "Castle Nathria",
 					data = function(alt_data) return self:MakeRaidString(alt_data.nathria_normal, alt_data.nathria_heroic, alt_data.nathria_mythic) end
@@ -982,7 +927,7 @@ function AltManager:MakeTopBottomTextures(frame)
 		frame.topPanelString:SetJustifyV("CENTER")
 		frame.topPanelString:SetWidth(260)
 		frame.topPanelString:SetHeight(20)
-		frame.topPanelString:SetText("Alt Manager");
+		frame.topPanelString:SetText("Alt Manager 2");
 		frame.topPanelString:ClearAllPoints();
 		frame.topPanelString:SetPoint("CENTER", frame.topPanel, "CENTER", 0, 0);
 		frame.topPanelString:Show();
