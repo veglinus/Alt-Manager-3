@@ -522,9 +522,10 @@ function AltManager:CollectData(do_artifact)
 
 	local world_boss_quests = {
 		[61813] = "Valinor",
-		[61814] = "Nurgash", -- THIS IS A GUESS!
+		[61814] = "Nurgash",
 		[61815] = "Oranomoros",
 		[61816] = "Mortanis", 
+		[64531] = "Mor'geth",
 	}
 	local worldboss = false
 	for k,v in pairs(world_boss_quests)do
