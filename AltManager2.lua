@@ -30,8 +30,10 @@ local worldboss_label = "World Boss"
 local conquest_label = "Conquest"
 local conquest_earned_label = "Conquest Earned"
 local renown_label = "Renown"
-local stygia_label = "Stygia"
 local soul_ash_label = "Soul Ash"
+local soul_cinders_label = "Soul Cinders"
+local stygia_label = "Stygia"
+local stygian_ember_label = "Stygian Ember"
 local reservoir_anima_label = "Stored Anima"
 
 local VERSION = "1.0.1"
@@ -490,11 +492,6 @@ function AltManager:CollectData(do_artifact)
 	
 	local _, ilevel = GetAverageItemLevel();
 
-	local stygia = GetCurrencyAmount(1767);
-	local soul_ash = GetCurrencyAmount(1828);
-	local stored_anima = GetCurrencyAmount(1813);
-	local renown = C_CovenantSanctumUI.GetRenownLevel();
-
 	local char_table = {}
 
 	char_table.guid = UnitGUID('player');
@@ -509,10 +506,12 @@ function AltManager:CollectData(do_artifact)
 	char_table.conquest_earned = conquest_earned;
 	char_table.conquest_total = conquest_total;
 
-	char_table.stygia = stygia;
-	char_table.soul_ash = soul_ash;
-	char_table.stored_anima = stored_anima;
-	char_table.renown = renown;
+	char_table.renown = C_CovenantSanctumUI.GetRenownLevel();
+	char_table.soul_ash = GetCurrencyAmount(1828);
+	char_table.soul_cinders = GetCurrencyAmount(1906);
+	char_table.stygia = GetCurrencyAmount(1767);
+	char_table.stygian_ember = GetCurrencyAmount(1977);
+	char_table.stored_anima = GetCurrencyAmount(1813);
 
 	char_table.nathria_normal = nathria_normal;
 	char_table.nathria_heroic = nathria_heroic;
@@ -753,36 +752,52 @@ function AltManager:CreateContent()
 			data = function(alt_data) return (dungeons[alt_data.dungeon] or alt_data.dungeon) .. " +" .. tostring(alt_data.level); end,
 		},
 
-		fake_just_for_offset = {
-			order = 6.1,
+		fake_just_for_offset_1 = {
+			order = 5,
 			label = "",
 			data = function(alt_data) return " " end,
 		},
 
 		renown = {
-			order = 6.2,
+			order = 5.1,
 			label = renown_label,
 			data = function(alt_data) return tostring(alt_data.renown or "?") end,
 		},
-		stygia = {
-			order = 6.4,
-			label = stygia_label,
-			data = function(alt_data) return tostring(alt_data.stygia or "0") end,
-		},
-		soul_ash = {
-			order = 6.3,
-			label = soul_ash_label,
-			data = function(alt_data) return tostring(alt_data.soul_ash or "0") end,
-		},
-		
 		stored_anima = {
-			order = 6.5,
+			order = 5.2,
 			label = reservoir_anima_label,
 			data = function(alt_data) return tostring(alt_data.stored_anima or "0") end,
 		},
 
 		fake_just_for_offset_2 = {
-			order = 6.9,
+			order = 6,
+			label = "",
+			data = function(alt_data) return " " end,
+		},
+
+		soul_ash = {
+			order = 6.1,
+			label = soul_ash_label,
+			data = function(alt_data) return tostring(alt_data.soul_ash or "0") end,
+		},
+		soul_cinders = {
+			order = 6.2,
+			label = soul_cinders_label,
+			data = function(alt_data) return tostring(alt_data.soul_cinders or "0") end,
+		},
+		stygia = {
+			order = 6.3,
+			label = stygia_label,
+			data = function(alt_data) return tostring(alt_data.stygia or "0") end,
+		},
+		stygian_ember = {
+			order = 6.4,
+			label = stygian_ember_label,
+			data = function(alt_data) return tostring(alt_data.stygian_ember or "0") end,
+		},
+
+		fake_just_for_offset_3 = {
+			order = 7,
 			label = "",
 			data = function(alt_data) return " " end,
 		},
@@ -803,11 +818,12 @@ function AltManager:CreateContent()
 			data = function(alt_data) return (alt_data.conquest_earned and (tostring(alt_data.conquest_earned) .. " / " .. C_CurrencyInfo.GetCurrencyInfo(Constants.CurrencyConsts.CONQUEST_CURRENCY_ID).maxQuantity) or "?")  end, --   .. "/" .. "500"
 		},
 
-		dummy_line = {
+		fake_just_for_offset_4 = {
 			order = 12,
 			label = " ",
 			data = function(alt_data) return " " end,
 		},
+		
 		raid_unroll = {
 			order = 13,
 			data = "unroll",
