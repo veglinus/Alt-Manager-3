@@ -479,7 +479,11 @@ function AltManager:CollectData(do_artifact)
 	local worldboss = false
 	for k,v in pairs(world_boss_quests)do
 		if C_QuestLog.IsQuestFlaggedCompleted(k) then
-			worldboss = v
+			if worldboss then 
+				worldboss = worldboss .. ", " .. v
+			else 
+				worldboss = v
+			end
 		end
 	end
 
@@ -823,7 +827,7 @@ function AltManager:CreateContent()
 			label = " ",
 			data = function(alt_data) return " " end,
 		},
-		
+
 		raid_unroll = {
 			order = 13,
 			data = "unroll",
