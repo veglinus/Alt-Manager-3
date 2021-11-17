@@ -36,7 +36,7 @@ local stygia_label = "Stygia"
 local stygian_ember_label = "Stygian Ember"
 local reservoir_anima_label = "Stored Anima"
 
-local VERSION = "1.0.1"
+local VERSION = "1.0.2"
 
 local function GetCurrencyAmount(id)
 	local info = C_CurrencyInfo.GetCurrencyInfo(id)
