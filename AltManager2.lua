@@ -9,7 +9,7 @@ _G["AltManager2"] = AltManager;
 
 local Dialog = LibStub("LibDialog-1.0")
 
-local sizey = 320;
+local sizey = 410;
 local instances_y_add = 45;
 local xoffset = 0;
 local yoffset = 40;
@@ -35,6 +35,8 @@ local soul_cinders_label = "Soul Cinders"
 local stygia_label = "Stygia"
 local stygian_ember_label = "Stygian Ember"
 local reservoir_anima_label = "Stored Anima"
+local valor_label = "Valor Points"
+local research_label = "Cataloged Research"
 
 local VERSION = "1.0.2"
 
@@ -258,9 +260,9 @@ function AltManager:ValidateReset()
 			char_table.expires = self:GetNextWeeklyResetTime();
 			char_table.worldboss = false;
 			
-			char_table.nathria_normal = 0;
-			char_table.nathria_heroic = 0;
-			char_table.nathria_mythic = 0;
+			char_table.sanctum_normal = 0;
+			char_table.sanctum_heroic = 0;
+			char_table.sanctum_mythic = 0;
 
 		end
 	end
@@ -461,11 +463,11 @@ function AltManager:CollectData(do_artifact)
 	for i = 1, saves do
 		local name, _, reset, difficulty, _, _, _, _, _, _, bosses, killed_bosses = GetSavedInstanceInfo(i);
 
-		-- Castle Nathria IDs = {1735, 1744, 1745, 1746, 1747, 1748, 1750, 1755}
-		if name == C_Map.GetMapInfo(1735).name and reset > 0 then
-			if difficulty == normal_difficulty then nathria_normal = killed_bosses end
-			if difficulty == heroic_difficulty then nathria_heroic = killed_bosses end
-			if difficulty == mythic_difficulty then nathria_mythic = killed_bosses end
+		-- Castle sanctum IDs = {1735, 1744, 1745, 1746, 1747, 1748, 1750, 1755}
+		if name == C_Map.GetMapInfo(1998).name and reset > 0 then
+			if difficulty == normal_difficulty then sanctum_normal = killed_bosses end
+			if difficulty == heroic_difficulty then sanctum_heroic = killed_bosses end
+			if difficulty == mythic_difficulty then sanctum_mythic = killed_bosses end
 		end
 	end
 
@@ -514,12 +516,14 @@ function AltManager:CollectData(do_artifact)
 	char_table.soul_ash = GetCurrencyAmount(1828);
 	char_table.soul_cinders = GetCurrencyAmount(1906);
 	char_table.stygia = GetCurrencyAmount(1767);
+	char_table.valor = GetCurrencyAmount(1191);
+	char_table.research = GetCurrencyAmount(1931);
 	char_table.stygian_ember = GetCurrencyAmount(1977);
 	char_table.stored_anima = GetCurrencyAmount(1813);
 
-	char_table.nathria_normal = nathria_normal;
-	char_table.nathria_heroic = nathria_heroic;
-	char_table.nathria_mythic = nathria_mythic;
+	char_table.sanctum_normal = sanctum_normal;
+	char_table.sanctum_heroic = sanctum_heroic;
+	char_table.sanctum_mythic = sanctum_mythic;
 
 	char_table.expires = self:GetNextWeeklyResetTime();
 	char_table.data_obtained = time();
@@ -799,6 +803,16 @@ function AltManager:CreateContent()
 			label = stygian_ember_label,
 			data = function(alt_data) return tostring(alt_data.stygian_ember or "0") end,
 		},
+		valor = {
+			order = 6.5,
+			label = valor_label,
+			data = function(alt_data) return tostring(alt_data.valor or "0") end,
+		},
+		research = {
+			order = 6.6,
+			label = research_label,
+			data = function(alt_data) return tostring(alt_data.research or "0") end,
+		},
 
 		fake_just_for_offset_3 = {
 			order = 7,
@@ -823,38 +837,22 @@ function AltManager:CreateContent()
 		},
 
 		fake_just_for_offset_4 = {
-			order = 12,
-			label = " ",
+			order = 10,
+			label = "",
 			data = function(alt_data) return " " end,
 		},
 
-		raid_unroll = {
-			order = 13,
-			data = "unroll",
-			name = "Instances >>",
-			unroll_function = function(button, my_rows)
-				self.instances_unroll = self.instances_unroll or {};
-				self.instances_unroll.state = self.instances_unroll.state or "closed";
-				if self.instances_unroll.state == "closed" then
-					self:OpenInstancesUnroll(my_rows)
-					-- update ui
-					button:SetText("Instances <<");
-					self.instances_unroll.state = "open";
-				else
-					self:CloseInstancesUnroll()
-					-- update ui
-					button:SetText("Instances >>");
-					self.instances_unroll.state = "closed";
-				end
-			end,
-			rows = {
-				castle_nathria = {
-					order = 4,
-					label = "Castle Nathria",
-					data = function(alt_data) return self:MakeRaidString(alt_data.nathria_normal, alt_data.nathria_heroic, alt_data.nathria_mythic) end
-				},
-			}
-		}
+		castle_sanctum = {
+			order = 11,
+			label = "Sanctum of Domination",
+			data = function(alt_data) return self:MakeRaidString(alt_data.sanctum_normal, alt_data.sanctum_heroic, alt_data.sanctum_mythic) end
+		},
+		fake_just_for_offset_5 = {
+			order = 12,
+			label = "",
+			data = function(alt_data) return " " end,
+		},
+
 	}
 	self.columns_table = column_table;
 
