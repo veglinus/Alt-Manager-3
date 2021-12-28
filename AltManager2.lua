@@ -2,6 +2,7 @@
 -- Previously Method Alt Manager
 -- updates for Bfa by: Kabootzey - Tarren Mill <Ended Careers>, 2018
 -- updates for 9.1.5 - hupett, 2021
+-- small updates for 9.1.5 - veglinus, 2021
 
 local _, AltManager = ...;
 
@@ -38,7 +39,7 @@ local reservoir_anima_label = "Stored Anima"
 local valor_label = "Valor Points"
 local research_label = "Cataloged Research"
 
-local VERSION = "1.0.2"
+local VERSION = "1.0.3"
 
 local function GetCurrencyAmount(id)
 	local info = C_CurrencyInfo.GetCurrencyInfo(id)
