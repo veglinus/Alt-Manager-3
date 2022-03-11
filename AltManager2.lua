@@ -2,11 +2,12 @@
 -- Previously Method Alt Manager
 -- updates for Bfa by: Kabootzey - Tarren Mill <Ended Careers>, 2018
 -- updates for 9.1.5 - hupett, 2021
--- small updates for 9.1.5 - veglinus, 2021
+-- updates for 9.1.5 - veglinus, 2021
+-- updates for 9.2 - Roadruid - Twisting Nether <Student Council>
 
 local _, AltManager = ...;
 
-_G["AltManager2"] = AltManager;
+_G["AltManager3"] = AltManager;
 
 local Dialog = LibStub("LibDialog-1.0")
 
@@ -14,7 +15,7 @@ local sizey = 410;
 local instances_y_add = 45;
 local xoffset = 0;
 local yoffset = 40;
-local addon = "AltManager2";
+local addon = "AltManager3";
 local numel = table.getn;
 
 local per_alt_x = 120;
@@ -34,10 +35,10 @@ local renown_label = "Renown"
 local soul_ash_label = "Soul Ash"
 local soul_cinders_label = "Soul Cinders"
 local stygia_label = "Stygia"
-local stygian_ember_label = "Stygian Ember"
+local cypher_label = "Cypher"
 local reservoir_anima_label = "Stored Anima"
-local valor_label = "Valor Points"
-local research_label = "Cataloged Research"
+local valor_label = "Valor"
+local flux_label = "Cosmic Flux"
 
 local VERSION = "1.0.3"
 
@@ -55,6 +56,8 @@ local dungeons = {
 	[380] = "SD",
 	[381] = "SoA",
 	[382] = "ToP",
+	[391] = "STRT",
+	[392] = "GMBT",
  };
 
 SLASH_ALTMANAGER1 = "/alts";
@@ -261,9 +264,9 @@ function AltManager:ValidateReset()
 			char_table.expires = self:GetNextWeeklyResetTime();
 			char_table.worldboss = false;
 			
-			char_table.sanctum_normal = 0;
-			char_table.sanctum_heroic = 0;
-			char_table.sanctum_mythic = 0;
+			char_table.sepulcher_normal = 0;
+			char_table.sepulcher_heroic = 0;
+			char_table.sepulcher_mythic = 0;
 
 		end
 	end
@@ -464,11 +467,11 @@ function AltManager:CollectData(do_artifact)
 	for i = 1, saves do
 		local name, _, reset, difficulty, _, _, _, _, _, _, bosses, killed_bosses = GetSavedInstanceInfo(i);
 
-		-- Castle sanctum IDs = {1735, 1744, 1745, 1746, 1747, 1748, 1750, 1755}
-		if name == C_Map.GetMapInfo(1998).name and reset > 0 then
-			if difficulty == normal_difficulty then sanctum_normal = killed_bosses end
-			if difficulty == heroic_difficulty then sanctum_heroic = killed_bosses end
-			if difficulty == mythic_difficulty then sanctum_mythic = killed_bosses end
+		-- Castle Nathria IDs = {1735, 1744, 1745, 1746, 1747, 1748, 1750, 1755}
+		if name == C_Map.GetMapInfo(2055).name and reset > 0 then
+			if difficulty == normal_difficulty then sepulcher_normal = killed_bosses end
+			if difficulty == heroic_difficulty then sepulcher_heroic = killed_bosses end
+			if difficulty == mythic_difficulty then sepulcher_mythic = killed_bosses end
 		end
 	end
 
@@ -478,6 +481,7 @@ function AltManager:CollectData(do_artifact)
 		[61815] = "Oranomoros",
 		[61816] = "Mortanis", 
 		[64531] = "Mor'geth",
+		[65143] = "Antros",
 	}
 	local worldboss = false
 	for k,v in pairs(world_boss_quests)do
@@ -517,14 +521,14 @@ function AltManager:CollectData(do_artifact)
 	char_table.soul_ash = GetCurrencyAmount(1828);
 	char_table.soul_cinders = GetCurrencyAmount(1906);
 	char_table.stygia = GetCurrencyAmount(1767);
-	char_table.valor = GetCurrencyAmount(1191);
-	char_table.research = GetCurrencyAmount(1931);
-	char_table.stygian_ember = GetCurrencyAmount(1977);
+	char_table.cypher = GetCurrencyAmount(1979);
 	char_table.stored_anima = GetCurrencyAmount(1813);
+	char_table.valor = GetCurrencyAmount(1191);
+	char_table.flux = GetCurrencyAmount(2009);
 
-	char_table.sanctum_normal = sanctum_normal;
-	char_table.sanctum_heroic = sanctum_heroic;
-	char_table.sanctum_mythic = sanctum_mythic;
+	char_table.sepulcher_normal = sepulcher_normal;
+	char_table.sepulcher_heroic = sepulcher_heroic;
+	char_table.sepulcher_mythic = sepulcher_mythic;
 
 	char_table.expires = self:GetNextWeeklyResetTime();
 	char_table.data_obtained = time();
@@ -766,6 +770,7 @@ function AltManager:CreateContent()
 			label = "",
 			data = function(alt_data) return " " end,
 		},
+		
 
 		renown = {
 			order = 5.1,
@@ -794,25 +799,21 @@ function AltManager:CreateContent()
 			label = soul_cinders_label,
 			data = function(alt_data) return tostring(alt_data.soul_cinders or "0") end,
 		},
-		stygia = {
-			order = 6.3,
-			label = stygia_label,
-			data = function(alt_data) return tostring(alt_data.stygia or "0") end,
-		},
-		stygian_ember = {
-			order = 6.4,
-			label = stygian_ember_label,
-			data = function(alt_data) return tostring(alt_data.stygian_ember or "0") end,
-		},
+		
 		valor = {
-			order = 6.5,
+			order = 6.4,
 			label = valor_label,
 			data = function(alt_data) return tostring(alt_data.valor or "0") end,
 		},
-		research = {
+		flux = {
 			order = 6.6,
-			label = research_label,
-			data = function(alt_data) return tostring(alt_data.research or "0") end,
+			label = flux_label,
+			data = function(alt_data) return tostring(alt_data.flux or "0") end,
+		},
+		cypher = {
+			order = 6.5,
+			label = cypher_label,
+			data = function(alt_data) return tostring(alt_data.cypher or "0") end,
 		},
 
 		fake_just_for_offset_3 = {
@@ -836,24 +837,18 @@ function AltManager:CreateContent()
 			label = conquest_earned_label,
 			data = function(alt_data) return (alt_data.conquest_earned and (tostring(alt_data.conquest_earned) .. " / " .. C_CurrencyInfo.GetCurrencyInfo(Constants.CurrencyConsts.CONQUEST_CURRENCY_ID).maxQuantity) or "?")  end, --   .. "/" .. "500"
 		},
+		sepulcher = {
+			order = 10,
+			label = "Sepulcher",
+			data = function(alt_data) return self:MakeRaidString(alt_data.sepulcher_normal, alt_data.sepulcher_heroic, alt_data.sepulcher_mythic) end
+		},
 
 		fake_just_for_offset_4 = {
-			order = 10,
-			label = "",
-			data = function(alt_data) return " " end,
-		},
-
-		castle_sanctum = {
-			order = 11,
-			label = "Sanctum of Domination",
-			data = function(alt_data) return self:MakeRaidString(alt_data.sanctum_normal, alt_data.sanctum_heroic, alt_data.sanctum_mythic) end
-		},
-		fake_just_for_offset_5 = {
 			order = 12,
 			label = "",
 			data = function(alt_data) return " " end,
 		},
-
+		
 	}
 	self.columns_table = column_table;
 
@@ -946,7 +941,7 @@ function AltManager:MakeTopBottomTextures(frame)
 		frame.topPanelString:SetJustifyV("CENTER")
 		frame.topPanelString:SetWidth(260)
 		frame.topPanelString:SetHeight(20)
-		frame.topPanelString:SetText("Alt Manager 2");
+		frame.topPanelString:SetText("Alt Manager 3");
 		frame.topPanelString:ClearAllPoints();
 		frame.topPanelString:SetPoint("CENTER", frame.topPanel, "CENTER", 0, 0);
 		frame.topPanelString:Show();
