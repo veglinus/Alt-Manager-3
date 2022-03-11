@@ -1,5 +1,5 @@
 ## Interface: 90105
-## Title: Alt Manager 2
+## Title: Alt Manager 3
 ## Author: Qoning, hupett
 ## Version: v1.0.2
 ## Notes: Concise information about your alts and weekly stuff.
